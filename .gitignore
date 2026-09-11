@@ -1,0 +1,26 @@
+# PlatformIO
+.pio/
+.pioenvs/
+.piolibdeps/
+.clang_complete
+.gcc-flags.json
+
+# IDEs and Editors
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Build artifacts and caches
+build/
+*.py[cod]
+*$py.class
+__pycache__/
+
+# Temporary and backup files
+*.tmp
+*.bak
+*.swp
+*~
+*.old
+*.orig
