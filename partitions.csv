@@ -1,4 +1,4 @@
-# Espressif ESP32-C6 Partition Table (for 8MB Flash)
+# Espressif ESP32-C6 Partition Table (ends at 0x3F0000, fits 4MB and 8MB flash)
 # Name,   Type, SubType, Offset,  Size,     Flags
 nvs,      data, nvs,     0x9000,  0x6000,
 phy_init, data, phy,     0xf000,  0x1000,
