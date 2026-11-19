@@ -1,5 +1,8 @@
 """Compiles ssid_list.conf (project root) into main/embedded_config.h.
 
+If ssid_list.local.conf exists next to it, that file is used instead. It is ignored by git,
+so personal network names stay out of the repository.
+
 Runs as a PlatformIO pre-build script, from main/CMakeLists.txt for plain idf.py builds,
 and standalone: python scripts/generate_config.py
 """
@@ -25,7 +28,10 @@ def generate():
     if not root_dir:
         root_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-    conf_path = os.path.join(root_dir, "ssid_list.conf")
+    conf_path = os.path.join(root_dir, "ssid_list.local.conf")
+    if not os.path.exists(conf_path):
+        conf_path = os.path.join(root_dir, "ssid_list.conf")
+    conf_name = os.path.basename(conf_path)
     out_path = os.path.join(root_dir, "main", "embedded_config.h")
 
     try:
@@ -44,7 +50,7 @@ def generate():
     escaped_lines = []
     for number, line in enumerate(lines, start=1):
         if len(line.encode("utf-8")) > MAX_LINE_BYTES and not line.lstrip().startswith(("#", ";")):
-            print(f"[CONFIG] Warning: ssid_list.conf line {number} is longer than {MAX_LINE_BYTES} bytes; "
+            print(f"[CONFIG] Warning: {conf_name} line {number} is longer than {MAX_LINE_BYTES} bytes; "
                   "the firmware ignores the rest of the line")
         # Three-digit octal escapes are safe before any following character
         esc = "".join(chr(b) if 0x20 <= b <= 0x7E and b not in (0x22, 0x5C, 0x3F) else "\\%03o" % b
@@ -54,7 +60,7 @@ def generate():
         escaped_lines.append('    ""')
 
     c_content = "\n".join(escaped_lines)
-    header_code = f"""// AUTO-GENERATED FROM ssid_list.conf - DO NOT EDIT DIRECTLY
+    header_code = f"""// AUTO-GENERATED FROM {conf_name} - DO NOT EDIT DIRECTLY
 #pragma once
 
 static const char EMBEDDED_SSID_LIST_CONF[] =

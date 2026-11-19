@@ -52,6 +52,17 @@ def main(compiler):
             print("  got:     ", got)
             return 1
 
+        # A local override file wins over the tracked manifest
+        with open(os.path.join(tmp, "ssid_list.local.conf"), "w", encoding="utf-8", newline="") as f:
+            f.write("[networks]\nLocalOnly\n")
+        subprocess.check_call([sys.executable, os.path.join(tmp, "scripts", "generate_config.py")], stdout=subprocess.DEVNULL)
+        with open(os.path.join(tmp, "main", "embedded_config.h"), encoding="utf-8") as f:
+            header = f.read()
+        if "LocalOnly" not in header or "What" in header:
+            print("generator test FAILED: ssid_list.local.conf was not used instead of ssid_list.conf")
+            return 1
+        os.remove(os.path.join(tmp, "ssid_list.local.conf"))
+
         os.remove(os.path.join(tmp, "ssid_list.conf"))
         missing = subprocess.run([sys.executable, os.path.join(tmp, "scripts", "generate_config.py")],
                                  stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)

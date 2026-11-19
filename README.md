@@ -116,6 +116,8 @@ Comments may follow a numeric or on/off `key = value` setting, but a line in `[n
 
 *(No C code edits required—the build toolchain automatically compiles `ssid_list.conf` directly into flash during the build process).*
 
+To keep your own network names out of git, copy `ssid_list.conf` to `ssid_list.local.conf` and edit the copy. When that file exists the build uses it instead of `ssid_list.conf`, and `.gitignore` excludes it.
+
 ---
 
 ### Step 5: Build, Flash & Launch Telemetry Console

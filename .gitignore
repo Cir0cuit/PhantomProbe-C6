@@ -25,6 +25,9 @@ __pycache__/
 *.old
 *.orig
 
+# Personal manifest, used instead of ssid_list.conf when present
+ssid_list.local.conf
+
 # Generated at build time
 main/embedded_config.h
 sdkconfig
