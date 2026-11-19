@@ -13,9 +13,9 @@ extern "C" {
  * @brief Telemetry events mapped to distinct optical indicators on the WS2812 RGB LED.
  */
 typedef enum {
-    LED_EVENT_IDLE,                 // Idle heartbeat pulse (unconnected / client paired)
+    LED_EVENT_IDLE,                 // Idle heartbeat pulse (unconnected / client connected)
     LED_EVENT_BEACON_BURST,          // 802.11 raw beacon burst injection pulse
-    LED_EVENT_PROBE_RESPONSE,        // Active client probe response dispatched
+    LED_EVENT_PROBE_RESPONSE,        // Directed client probe answered
     LED_EVENT_WIFI_WILDCARD_SCAN,    // External device active 802.11 probe scan detected
     LED_EVENT_WIFI_AUTH_ASSOC,       // Client Wi-Fi connection/authentication attempt
     LED_EVENT_WIFI_DEAUTH,           // Wi-Fi Deauthentication/Disassociation frame intercepted
@@ -23,25 +23,18 @@ typedef enum {
     LED_EVENT_BLE_CONNECT,           // BLE client connection established
     LED_EVENT_BLE_DISCONNECT,        // BLE client connection terminated
     LED_EVENT_BLE_GATT_READ,         // Client GATT characteristic read access
+    LED_EVENT_COUNT
 } led_event_t;
 
 /**
  * @brief Initializes the hardware RMT peripheral on GPIO8 to drive the onboard WS2812 RGB LED.
- *        Applies eye-safe logarithmic PWM scaling to prevent glare and retina fatigue.
+ *        Brightness is scaled linearly into an eye-safe PWM range (3..73 of 255).
  *
- * @param brightness Max brightness percentage (1 to 100, default 5%).
+ * @param brightness Max brightness percentage (0 to 100, 0 = off).
+ * @param enabled false switches the LED off and starts no animation.
  * @return true on success, false on failure.
  */
-bool rgb_led_init(uint8_t brightness);
-
-/**
- * @brief Directly sets the RGB LED raw channel values before eye-safe scaling.
- *
- * @param r Channel R value (0-255).
- * @param g Channel G value (0-255).
- * @param b Channel B value (0-255).
- */
-void rgb_led_set_color(uint8_t r, uint8_t g, uint8_t b);
+bool rgb_led_init(uint8_t brightness, bool enabled);
 
 /**
  * @brief Updates client connection state (switches idle breathing pattern when connected).
@@ -52,7 +45,8 @@ void rgb_led_set_connected(bool connected);
 
 /**
  * @brief Triggers an asynchronous, non-blocking visual telemetry event on the RGB LED.
- *        Higher-priority RF events preempt the idle heartbeat animation.
+ *        A pulse is replaced only by an event of the same or a higher rank.
+ *        Does nothing while the LED is disabled.
  *
  * @param event Event type to display.
  */
